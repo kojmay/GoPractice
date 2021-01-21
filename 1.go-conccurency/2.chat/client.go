@@ -14,8 +14,7 @@ func jugeErr(err error, prompt string) bool {
 }
 
 var (
-	readChan  chan string
-	writeChan chan string
+	msgChan chan string
 )
 
 // start to chat
@@ -31,47 +30,74 @@ func startChat(serverURL string) {
 	}
 
 	//1. send nick name first
+	// todo : 交互
 	_, err = conn.Write([]byte(nickname))
 	if !jugeErr(err, "conn.Write nickname") {
 		return
 	}
-
 	defer conn.Close()
 
-	go readFun(conn)
-	go writeFun(conn)
+	// 用户输入
+	go inputFunc(conn)
+	// 从服务器接收
+	go readFromServerFun(conn)
+	// go writeFun(conn)
+
+	for msg := <- msgChan {
+		fmt.Println(msg)
+	}
 
 	// //2. chat with server
-	// var userInput string
-	// for {
-	// 	fmt.Println("Input:")
-	// 	fmt.Scan(&userInput)
-	// 	//todo: sigle routine, change to mutiple routines to simulate more chat situations
-	// 	_, err = conn.Write([]byte(userInput))
-	// 	if !jugeErr(err, "conn.Write userInput") {
-	// 		return
-	// 	}
+	var userInput string
+	for {
+		fmt.Println("Input:")
+		fmt.Scan(&userInput)
+		//todo: sigle routine, change to mutiple routines to simulate more chat situations
+		_, err = conn.Write([]byte(userInput))
+		if !jugeErr(err, "conn.Write userInput") {
+			return
+		}
 
-	// 	// read from server
-	// 	buf := make([]byte, 1024)
-	// 	_, err = conn.Read(buf)
-	// 	if !jugeErr(err, "conn.Read from server") {
-	// 		return
-	// 	}
-	// 	fmt.Println(string(buf[:]))
-	// }
+		// read from server
+		buf := make([]byte, 1024)
+		_, err = conn.Read(buf)
+		if !jugeErr(err, "conn.Read from server") {
+			return
+		}
+		fmt.Println(string(buf[:]))
+	}
 
 }
 
-func readFunc(conn net.Conn) {
-	for msg := range readChan {
-		fmt.Println(msg)
+func inputFunc(conn net.Conn) {
+	// for msg := range readChan {
+	// 	fmt.Println(msg)
+	// }
+
+	var userInput string
+	for {
+		fmt.Scan(&userInput)
+		//todo: sigle routine, change to mutiple routines to simulate more chat situations
+		_, err = conn.Write([]byte(userInput))
+		if !jugeErr(err, "conn.Write userInput") {
+			continue
+		}
+		// msgChan <- userInput
+		// 用户输入
+
 	}
 }
 
-func writeFunc(conn net.Conn) {
-	for msg := range writeChan {
-		conn.Write([]byte(msg))
+func readFromServerFun(conn net.Conn) {
+	for {
+		// read from server
+		buf := make([]byte, 1024)
+		_, err = conn.Read(buf)
+		if !jugeErr(err, "conn.Read from server") {
+			return
+		}
+		// fmt.Println(string(buf[:]))
+		msgChan <- string(buf[:])
 	}
 }
 
