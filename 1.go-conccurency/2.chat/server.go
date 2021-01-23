@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"os"
 	"time"
 )
 
@@ -47,16 +49,36 @@ func startListenning(serverURL string) {
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 
-	nickname := make([]byte, 1024)
-	_, err := conn.Read(nickname)
-	if !jugeErr(err, "server conn.Read nickname") {
-		return
+	// nickname := make([]byte, 1024)
+	// _, err := conn.Read(nickname)
+	// if !jugeErr(err, "server conn.Read nickname") {
+	// 	return
+	// }
+
+	// nickname, err := bufio.NewReader(conn).ReadBytes()
+	nickname := "hh"
+
+	scanner := bufio.NewScanner(conn)
+	// scanner.Split(bufio.ScanWords)
+	for scanner.Scan() {
+		// scanner.Scan()
+		fmt.Println(scanner.Text())
 	}
+
+	// scanner := bufio.NewScanner(os.Stdin)
+	// for scanner.Scan() {
+	// 	fmt.Println(scanner.Text()) // Println will add back the final '\n'
+	// }
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	}
+
+	// nickname, _ := bufio.NewReader(conn).ReadString('\n')
+	fmt.Println(string(nickname))
 
 	var client Client
 	client.nickname = string(nickname)
 	client.ipAdd = conn.RemoteAddr().String()
-	// client.conn = conn
 	client.clientChan = make(chan string)
 	client.joinTime = time.Now()
 	allClients[client.ipAdd] = client
@@ -67,6 +89,7 @@ func handleConn(conn net.Conn) {
 	// 开始广播监听
 	go broadcast()
 
+	// fmt.Println("A new client joined, \tip:" + client.ipAdd + "\tnickname" + client.nickname)
 	// broadcast new client
 	broadcastChan <- "A new client joined, \tip:" + client.ipAdd + "\tnickname" + client.nickname
 }
@@ -88,9 +111,16 @@ func broadcast() {
 // communicate with client
 func communicateWithClient(client Client, conn net.Conn) {
 
+	go readFromClient(client, conn)
+
 	for msg := range client.clientChan {
 		conn.Write([]byte(msg + "\n"))
 	}
+	// go writeToClient(client, conn)
+}
+
+func readFromClient(client Client, conn net.Conn) {
+
 }
 
 // judge err

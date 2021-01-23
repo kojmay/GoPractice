@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 )
 
+// 判断err
 func jugeErr(err error, prompt string) bool {
 	if err != nil {
 		fmt.Println(prompt, ", err info: ", err)
@@ -14,6 +16,7 @@ func jugeErr(err error, prompt string) bool {
 }
 
 var (
+	// 读取的数据
 	msgChan chan string
 )
 
@@ -43,11 +46,11 @@ func startChat(serverURL string) {
 	go readFromServerFun(conn)
 	// go writeFun(conn)
 
-	for msg := <- msgChan {
+	for msg := range msgChan {
 		fmt.Println(msg)
 	}
 
-	// //2. chat with server
+	// 2. chat with server
 	var userInput string
 	for {
 		fmt.Println("Input:")
@@ -70,34 +73,32 @@ func startChat(serverURL string) {
 }
 
 func inputFunc(conn net.Conn) {
-	// for msg := range readChan {
-	// 	fmt.Println(msg)
-	// }
-
-	var userInput string
 	for {
+		var userInput string
 		fmt.Scan(&userInput)
 		//todo: sigle routine, change to mutiple routines to simulate more chat situations
-		_, err = conn.Write([]byte(userInput))
+
+		// user input, send to the server
+		_, err := conn.Write([]byte(userInput))
 		if !jugeErr(err, "conn.Write userInput") {
 			continue
 		}
-		// msgChan <- userInput
-		// 用户输入
-
 	}
 }
 
 func readFromServerFun(conn net.Conn) {
+
 	for {
 		// read from server
-		buf := make([]byte, 1024)
-		_, err = conn.Read(buf)
+		buf, err := bufio.NewReader(conn).ReadString('\n')
+
+		// buf := make([]byte, 1024)
+		// _, err = conn.Read(buf)
 		if !jugeErr(err, "conn.Read from server") {
 			return
 		}
 		// fmt.Println(string(buf[:]))
-		msgChan <- string(buf[:])
+		msgChan <- string(buf)
 	}
 }
 
