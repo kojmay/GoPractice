@@ -1,25 +1,21 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
-	"os"
+	"sync"
 	"time"
 )
 
-// user info struct
-type Client struct {
-	nickname   string
-	ipAdd      string
-	clientChan chan string
-	joinTime   time.Time
-	// conn     net.Conn
+// msg struct
+type Message struct {
+	owner   string
+	content string
 }
 
 var (
 	allClients    map[string]Client // store all user connections
-	broadcastChan chan string       //broadcast chan
+	broadcastChan chan Message      //broadcast chan
 )
 
 // 1.start listenning
@@ -32,6 +28,7 @@ func startListenning(serverURL string) {
 	defer listener.Close()
 
 	allClients = make(map[string]Client)
+	broadcastChan = make(chan Message)
 
 	//connect to the client
 	for {
@@ -40,87 +37,99 @@ func startListenning(serverURL string) {
 			continue
 		}
 
+		// handle clients connections
 		go handleConn(conn)
 	}
 
 }
 
+// user info struct
+type Client struct {
+	nickname   string
+	ID         int
+	ipAdd      string
+	clientChan chan string
+	joinTime   time.Time
+	// conn     net.Conn
+}
+
+func (u *Client) String() string {
+	return u.ipAdd + ", nickname:" + u.nickname + ", Enter At:" +
+		u.joinTime.Format("2006-01-02 15:04:05+8000")
+}
+
 // handle clients' connection
 func handleConn(conn net.Conn) {
-	defer conn.Close()
-
-	// nickname := make([]byte, 1024)
-	// _, err := conn.Read(nickname)
-	// if !jugeErr(err, "server conn.Read nickname") {
-	// 	return
-	// }
-
-	// nickname, err := bufio.NewReader(conn).ReadBytes()
-	nickname := "hh"
-
-	scanner := bufio.NewScanner(conn)
-	// scanner.Split(bufio.ScanWords)
-	for scanner.Scan() {
-		// scanner.Scan()
-		fmt.Println(scanner.Text())
+	nickname := make([]byte, 2048)
+	_, err := conn.Read(nickname)
+	if !jugeErr(err, "server conn.Read nickname") {
+		return
 	}
+	// fmt.Println("New client entered: " + string(nickname))
 
-	// scanner := bufio.NewScanner(os.Stdin)
-	// for scanner.Scan() {
-	// 	fmt.Println(scanner.Text()) // Println will add back the final '\n'
-	// }
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	// var client Client
+	// client.nickname = string(nickname[:n])
+	// client.ipAdd = conn.RemoteAddr().String()
+	// client.clientChan = make(chan string)
+	// client.joinTime = time.Now()
+
+	client := Client{
+		nickname:   string(nickname),
+		ID:         genUserID(),
+		ipAdd:      conn.RemoteAddr().String(),
+		clientChan: make(chan string),
+		joinTime:   time.Now(),
 	}
-
-	// nickname, _ := bufio.NewReader(conn).ReadString('\n')
-	fmt.Println(string(nickname))
-
-	var client Client
-	client.nickname = string(nickname)
-	client.ipAdd = conn.RemoteAddr().String()
-	client.clientChan = make(chan string)
-	client.joinTime = time.Now()
 	allClients[client.ipAdd] = client
-
-	// communicate with client
-	go communicateWithClient(client, conn)
 
 	// 开始广播监听
 	go broadcast()
 
-	// fmt.Println("A new client joined, \tip:" + client.ipAdd + "\tnickname" + client.nickname)
+	// communicate with client
+	go readFromClient(client, conn)
+	go writeToClient(client, conn)
+
 	// broadcast new client
-	broadcastChan <- "A new client joined, \tip:" + client.ipAdd + "\tnickname" + client.nickname
+	broadcastChan <- Message{"", "New joiner, nickname:" + client.nickname + "(ip:" + client.ipAdd + ")" + ", welcome!\n"}
+}
+
+// read from client
+func readFromClient(client Client, conn net.Conn) {
+
+	fmt.Println("start read from client")
+	msg := make([]byte, 2048)
+	for {
+		n, err := conn.Read(msg)
+		if !jugeErr(err, "conn.Read") { // 断开 or 结束
+			delete(allClients, client.ipAdd)
+			conn.Close()
+			break
+		}
+		fmt.Println(string(msg[:]))
+		broadcastChan <- Message{client.ipAdd, "\t\t " + client.nickname + "(" + client.ipAdd + "):" + string(msg[:n])}
+	}
 }
 
 // broadcast when user online and offline
 func broadcast() {
 	for {
 		msg := <-broadcastChan
+		fmt.Println("bradcast:", msg.content)
 		for _, client := range allClients {
-			// _, err := client.conn.Write([]byte(msg))
-			// if !jugeErr(err, "broadcast to client "+k) {
-			// 	return
-			// }
-			client.clientChan <- msg
+			// fmt.Println(" client.ipAdd != msg.owner", client.ipAdd != msg.owner)
+			if client.ipAdd != msg.owner {
+				client.clientChan <- msg.content
+			}
 		}
 	}
 }
 
-// communicate with client
-func communicateWithClient(client Client, conn net.Conn) {
-
-	go readFromClient(client, conn)
-
-	for msg := range client.clientChan {
-		conn.Write([]byte(msg + "\n"))
+// write to client
+func writeToClient(client Client, conn net.Conn) {
+	for {
+		msg := <-client.clientChan
+		conn.Write([]byte(msg))
 	}
-	// go writeToClient(client, conn)
-}
-
-func readFromClient(client Client, conn net.Conn) {
-
 }
 
 // judge err
@@ -130,6 +139,19 @@ func jugeErr(err error, prompt string) bool {
 		return false
 	}
 	return true
+}
+
+var (
+	globalID int
+	idLocker sync.Mutex
+)
+
+// generate user id
+func genUserID() int {
+	idLocker.Lock()
+	defer idLocker.Unlock()
+	globalID++
+	return globalID
 }
 
 func main() {

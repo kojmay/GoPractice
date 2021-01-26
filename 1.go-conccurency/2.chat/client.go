@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
+	"os"
 )
 
 // 判断err
@@ -15,10 +17,10 @@ func jugeErr(err error, prompt string) bool {
 	return true
 }
 
-var (
-	// 读取的数据
-	msgChan chan string
-)
+// var (
+// 	// 读取的数据
+// 	msgChan chan string
+// )
 
 // start to chat
 func startChat(serverURL string) {
@@ -40,65 +42,51 @@ func startChat(serverURL string) {
 	}
 	defer conn.Close()
 
-	// 用户输入
-	go inputFunc(conn)
-	// 从服务器接收
-	go readFromServerFun(conn)
-	// go writeFun(conn)
+	// another way to get user input
+	done := make(chan struct{})
+	go func() {
+		io.Copy(conn, os.Stdin)
+		done <- struct{}{}
+	}()
 
-	for msg := range msgChan {
-		fmt.Println(msg)
-	}
+	//another way to get server response
+	io.Copy(os.Stdout, conn)
+	<-done
 
-	// 2. chat with server
-	var userInput string
-	for {
-		fmt.Println("Input:")
-		fmt.Scan(&userInput)
-		//todo: sigle routine, change to mutiple routines to simulate more chat situations
-		_, err = conn.Write([]byte(userInput))
-		if !jugeErr(err, "conn.Write userInput") {
-			return
-		}
-
-		// read from server
-		buf := make([]byte, 1024)
-		_, err = conn.Read(buf)
-		if !jugeErr(err, "conn.Read from server") {
-			return
-		}
-		fmt.Println(string(buf[:]))
-	}
+	// // 用户输入
+	// go inputFunc(conn)
+	// // 从服务器接收
+	// readFromServerFun(conn)
 
 }
 
 func inputFunc(conn net.Conn) {
-	for {
-		var userInput string
-		fmt.Scan(&userInput)
-		//todo: sigle routine, change to mutiple routines to simulate more chat situations
 
-		// user input, send to the server
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		userInput := scanner.Text()
+		// fmt.Println(userInput)
 		_, err := conn.Write([]byte(userInput))
 		if !jugeErr(err, "conn.Write userInput") {
 			continue
 		}
 	}
+
 }
 
 func readFromServerFun(conn net.Conn) {
 
+	buf := make([]byte, 2048)
 	for {
 		// read from server
-		buf, err := bufio.NewReader(conn).ReadString('\n')
+		// buf, err := bufio.NewReader(conn).ReadString('\n')
 
-		// buf := make([]byte, 1024)
-		// _, err = conn.Read(buf)
+		n, err := conn.Read(buf)
 		if !jugeErr(err, "conn.Read from server") {
 			return
 		}
-		// fmt.Println(string(buf[:]))
-		msgChan <- string(buf)
+		fmt.Println(string(buf[:n]))
+		// msgChan <- string(buf)
 	}
 }
 
