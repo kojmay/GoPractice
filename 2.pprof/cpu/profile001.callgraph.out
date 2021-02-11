@@ -1,0 +1,334 @@
+positions: instr line
+events: cpu(ms)
+
+ob=
+fl=(1) D:\00my_work\03GoProjects\src\github.com\kojmay\GoPractice\2.pprof\cpu.go
+fn=(1) main.fibIter
+0x4c62bf 15 30
+
+ob=
+fl=(2) D:\00my_work\03Go\src\runtime\cgocall.go
+fn=(2) runtime.cgocall
+-796843 133 10
+
+ob=
+fl=(3) D:\00my_work\03Go\src\runtime\profbuf.go
+fn=(3) runtime.(*profBuf).read
++262455 512 10
+
+ob=
+fl=(4) D:\00my_work\03Go\src\runtime\stack.go
+fn=(4) runtime.adjustframe
++20244 620 10
++168 637 10
+
+ob=
+fl=(4)
+fn=(5) runtime.getStackMap
++7292 1299 10
++309 1259 10
+
+ob=
+fl=(5) D:\00my_work\03Go\src\runtime\symtab.go
+fn=(6) runtime.findfunc
++14619 644 10
++145 674 10
++22 681 10
+
+ob=
+fl=(5)
+fn=(7) runtime.pcvalue
++213 704 10
+
+ob=
+fl=(5)
+fn=(8) runtime.pcdatavalue
++3195 878 10
+
+ob=
+fl=(5)
+fn=(9) runtime.funcdata
++224 888 10
++47 889 10
+
+ob=
+fl=(6) D:\00my_work\03Go\src\runtime\traceback.go
+fn=(10) runtime.gentraceback
++25604 220 10
+
+ob=
+fl=(7) D:\00my_work\03Go\src\runtime\memmove_amd64.s
+fn=(11) runtime.memmove
++50419 412 10
++7 417 10
++26 422 10
+
+ob=
+fl=(1)
+fn=(1)
++411871 15 10
++10 15 10
+
+ob=
+fl=(8) D:\00my_work\03Go\src\runtime\cpuprof.go
+fn=(12) runtime/pprof.readProfile
+-784834 208 0
+cfl=(3)
+cfn=(3)
+calls=0 -534415 512
+* * 10
+
+ob=
+fl=(9) D:\00my_work\03Go\src\runtime\proc.go
+fn=(13) runtime.main
++194737 203 0
+cfl=(1)
+cfn=(14) main.main
+calls=0 +785392 33
+* * 10
+
+ob=
+fl=(4)
+fn=(4)
++76033 637 0
+cfl=(4)
+cfn=(5)
+calls=0 +83236 1218
+* * 20
+cfl=(4)
+cfn=(5)
+calls=0 +83386 1299
+* * 10
+cfl=(4)
+cfn=(5)
+calls=0 +83695 1259
+* * 10
+cfl=(4)
+cfn=(5)
+calls=0 +83945 1196
+* * 10
+
+ob=
+fl=(4)
+fn=(15) runtime.copystack
++2258 870 0
+cfl=(7)
+cfn=(11)
+calls=0 +102150 412
+* * 10
+cfl=(7)
+cfn=(11)
+calls=0 +102157 417
+* * 10
+cfl=(7)
+cfn=(11)
+calls=0 +102183 422
+* * 10
++283 889 0
+cfl=(6)
+cfn=(10)
+calls=0 +48319 334
+* * 70
+cfl=(6)
+cfn=(10)
+calls=0 +48785 254
+* * 30
+cfl=(6)
+cfn=(10)
+calls=0 +49473 220
+* * 10
+cfl=(6)
+cfn=(10)
+calls=0 +49503 220
+* * 10
+
+ob=
+fl=(4)
+fn=(16) runtime.newstack
++721 1044 0
+cfl=(4)
+cfn=(15)
+calls=0 * 889
+* * 120
+cfl=(4)
+cfn=(15)
+calls=0 -283 870
+* * 30
+
+ob=
+fl=(4)
+fn=(5)
++3941 1218 0
+cfl=(5)
+cfn=(9)
+calls=0 +22818 888
+* * 10
+cfl=(5)
+cfn=(9)
+calls=0 +22865 889
+* * 10
++709 1196 0
+cfl=(5)
+cfn=(8)
+calls=0 +18653 878
+* * 10
+
+ob=
+fl=(5)
+fn=(17) runtime.funcspdelta
++17251 844 0
+cfl=(5)
+cfn=(7)
+calls=0 +14749 704
+* * 10
+
+ob=
+fl=(10) D:\00my_work\03Go\src\runtime\syscall_windows.go
+fn=(18) syscall.Syscall6
++4044 201 0
+cfl=(2)
+cfn=(2)
+calls=0 -307969 133
+* * 10
+
+ob=
+fl=(6)
+fn=(10)
++21370 334 0
+cfl=(4)
+cfn=(4)
+calls=0 -29207 637
+* * 50
+cfl=(4)
+cfn=(4)
+calls=0 -29314 620
+* * 10
+cfl=(4)
+cfn=(4)
+calls=0 -29146 637
+* * 10
++466 254 0
+cfl=(5)
+cfn=(6)
+calls=0 -28296 644
+* * 10
+cfl=(5)
+cfn=(6)
+calls=0 -28151 674
+* * 10
+cfl=(5)
+cfn=(6)
+calls=0 -28129 681
+* * 10
++718 220 0
+cfl=(5)
+cfn=(17)
+calls=0 -25880 844
+* * 10
+
+ob=
+fl=(11) D:\00my_work\03Go\src\syscall\zsyscall_windows.go
+fn=(19) syscall.WriteConsole
++246682 1298 0
+cfl=(10)
+cfn=(18)
+calls=0 -22554 201
+* * 10
+
+ob=
+fl=(12) D:\00my_work\03Go\src\internal\poll\fd_windows.go
+fn=(20) internal/poll.(*FD).Write
++69244 704 0
+cfl=(12)
+cfn=(21) internal/poll.(*FD).writeConsole
+calls=0 +70877 769
+* * 10
+
+ob=
+fl=(12)
+fn=(21)
++1633 769 0
+cfl=(11)
+cfn=(19)
+calls=0 -69244 1298
+* * 10
+
+ob=
+fl=(13) D:\00my_work\03Go\src\os\file.go
+fn=(22) os.(*File).Write
++6245 153 0
+cfl=(14) D:\00my_work\03Go\src\os\file_windows.go
+cfn=(23) os.(*File).write
+calls=0 +6245 237
+* * 10
+
+ob=
+fl=(14)
+fn=(23)
+* 237 0
+cfl=(12)
+cfn=(20)
+calls=0 -7878 704
+* * 10
+
+ob=
+fl=(15) D:\00my_work\03Go\src\fmt\print.go
+fn=(24) fmt.Fprintln
++27242 265 0
+cfl=(13)
+cfn=(22)
+calls=0 * 153
+* * 10
+
+ob=
+fl=(16) D:\00my_work\03Go\src\runtime\pprof\pprof.go
+fn=(25) runtime/pprof.profileWriter
++87600 766 0
+cfl=(8)
+cfn=(12)
+calls=0 -673577 208
+* * 10
+
+ob=
+fl=(1)
+fn=(1)
++23651 15 0
+cfl=(1)
+cfn=(1)
+calls=0 +23676 10
+* * 150
+cfl=(1)
+cfn=(1)
+calls=0 +23630 15
+* * 30
+cfl=(1)
+cfn=(1)
+calls=0 +23647 15
+* * 10
+cfl=(1)
+cfn=(1)
+calls=0 +23657 15
+* * 10
++25 10 0
+cfl=(4)
+cfn=(16)
+calls=0 -510796 1044
+* * 150
+
+ob=
+fl=(15)
+fn=(26) fmt.Println
++539 274 0
+cfl=(15)
+cfn=(24)
+calls=0 -111276 265
+* * 10
+
+ob=
+fl=(1)
+fn=(14)
+* 33 0
+cfl=(15)
+cfn=(26)
+calls=0 * 274
+* * 10
